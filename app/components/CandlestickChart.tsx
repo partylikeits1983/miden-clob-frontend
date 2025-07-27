@@ -13,7 +13,7 @@ export default function CandlestickChart() {
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-white">BTC/USD</h3>
+        <h3 className="text-lg font-semibold text-white">ETH/USDC</h3>
         <div className="flex space-x-2">
           <span className="text-2xl font-bold text-green-400">$45,234.56</span>
           <span className="text-green-400">+2.34%</span>

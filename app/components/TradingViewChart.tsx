@@ -42,7 +42,7 @@ export default function TradingViewChart() {
       
       // Using CoinGecko API for OHLC data (past 30 days)
       const response = await fetch(
-        'https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=30'
+        'https://api.coingecko.com/api/v3/coins/ethereum/ohlc?vs_currency=usd&days=30'
       );
       
       if (!response.ok) {
@@ -184,7 +184,7 @@ export default function TradingViewChart() {
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-white">BTC/USD</h3>
+        <h3 className="text-lg font-semibold text-white">ETH/USDC</h3>
         <div className="flex space-x-2">
           <span className={`text-2xl font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
             ${currentPrice?.toLocaleString() || 'N/A'}

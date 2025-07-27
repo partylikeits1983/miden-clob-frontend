@@ -64,8 +64,8 @@ export default function OrderDepthChart({
   );
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex flex-col">
+      <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h3 className="text-lg font-semibold text-white">Order Book</h3>
         <div className="flex items-center gap-4">
           <div className="text-sm text-gray-400">
@@ -84,58 +84,47 @@ export default function OrderDepthChart({
         </div>
       </div>
 
-      <div className="space-y-4">
-        {/* Asks (Sell Orders) */}
-        <div>
-          <div className="flex justify-between text-xs text-gray-400 mb-2">
-            <span>Price (USD)</span>
-            <span>Amount (BTC)</span>
-            <span>Total</span>
-          </div>
-          <div className="space-y-1">
-            {asks.slice().reverse().map((ask, index) => (
-              <div key={index} className="relative">
-                <div
-                  className="absolute inset-0 bg-red-900 opacity-20"
-                  style={{ width: maxTotal > 0 ? `${(ask.total / maxTotal) * 100}%` : '0%' }}
-                />
-                <div className="relative flex justify-between text-sm py-1 px-2">
-                  <span className="text-red-400">${ask.price.toLocaleString()}</span>
-                  <span className="text-white">{ask.amount.toFixed(4)}</span>
-                  <span className="text-gray-300">{ask.total.toFixed(4)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="flex flex-col flex-1 min-h-0">
+        <div className="grid grid-cols-12 gap-2 text-xs text-gray-400 mb-2 flex-shrink-0 px-2">
+          <span className="col-span-4">Price (USD)</span>
+          <span className="col-span-4 text-center">Amount (BTC)</span>
+          <span className="col-span-4 text-right">Total</span>
         </div>
-
-        {/* Current Price */}
-        <div className="text-center py-2 border-y border-gray-700">
-          <div className="text-lg font-bold text-green-400">${last_price.toLocaleString()}</div>
-          <div className="text-xs text-gray-400">Last Price</div>
-        </div>
-
-        {/* Bids (Buy Orders) */}
-        <div>
-          <div className="space-y-1">
-            {bids.map((bid, index) => (
-              <div key={index} className="relative">
-                <div
-                  className="absolute inset-0 bg-green-900 opacity-20"
-                  style={{ width: maxTotal > 0 ? `${(bid.total / maxTotal) * 100}%` : '0%' }}
-                />
-                <div className="relative flex justify-between text-sm py-1 px-2">
-                  <span className="text-green-400">${bid.price.toLocaleString()}</span>
-                  <span className="text-white">{bid.amount.toFixed(4)}</span>
-                  <span className="text-gray-300">{bid.total.toFixed(4)}</span>
-                </div>
+        
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Asks (Sell Orders) - reversed to show highest first */}
+          {asks.slice().reverse().map((ask, index) => (
+            <div key={`ask-${index}`} className="relative flex-shrink-0">
+              <div
+                className="absolute inset-0 bg-red-900 opacity-20"
+                style={{ width: maxTotal > 0 ? `${(ask.total / maxTotal) * 100}%` : '0%' }}
+              />
+              <div className="relative grid grid-cols-12 gap-2 text-xs py-0.5 px-2">
+                <span className="col-span-4 text-red-400">${ask.price.toLocaleString()}</span>
+                <span className="col-span-4 text-white text-center">{ask.amount.toFixed(4)}</span>
+                <span className="col-span-4 text-gray-300 text-right">{ask.total.toFixed(4)}</span>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+          
+          {/* Bids (Buy Orders) */}
+          {bids.map((bid, index) => (
+            <div key={`bid-${index}`} className="relative flex-shrink-0">
+              <div
+                className="absolute inset-0 bg-green-900 opacity-20"
+                style={{ width: maxTotal > 0 ? `${(bid.total / maxTotal) * 100}%` : '0%' }}
+              />
+              <div className="relative grid grid-cols-12 gap-2 text-xs py-0.5 px-2">
+                <span className="col-span-4 text-green-400">${bid.price.toLocaleString()}</span>
+                <span className="col-span-4 text-white text-center">{bid.amount.toFixed(4)}</span>
+                <span className="col-span-4 text-gray-300 text-right">{bid.total.toFixed(4)}</span>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Summary */}
-        <div className="border-t border-gray-700 pt-4 space-y-2 text-sm">
+        <div className="border-t border-gray-700 pt-4 space-y-2 text-sm flex-shrink-0 mt-2">
           <div className="flex justify-between text-gray-400">
             <span>Total Bids:</span>
             <span className="text-green-400">

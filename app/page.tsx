@@ -33,7 +33,7 @@ export default function Home() {
         </div>
         
         {/* Right Panel - Order Depth Chart */}
-        <div className="w-80 flex-shrink-0">
+        <div className="w-96 flex-shrink-0">
           <OrderDepthChart />
         </div>
       </div>
