@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { depthChartService, DepthChartData } from '../depthChartService';
+import { useState, useEffect, useCallback } from "react";
+import { depthChartService, DepthChartData } from "../depthChartService";
 
 interface UseDepthChartOptions {
   baseAsset?: string;
@@ -15,12 +15,14 @@ interface UseDepthChartReturn {
   refresh: () => Promise<void>;
 }
 
-export const useDepthChart = (options: UseDepthChartOptions = {}): UseDepthChartReturn => {
+export const useDepthChart = (
+  options: UseDepthChartOptions = {},
+): UseDepthChartReturn => {
   const {
-    baseAsset = 'ETH',
-    quoteAsset = 'USDC',
+    baseAsset = "ETH",
+    quoteAsset = "USDC",
     refreshInterval = 2000, // 2 seconds default
-    autoRefresh = true
+    autoRefresh = true,
   } = options;
 
   const [data, setData] = useState<DepthChartData | null>(null);
@@ -30,12 +32,16 @@ export const useDepthChart = (options: UseDepthChartOptions = {}): UseDepthChart
   const fetchData = useCallback(async () => {
     try {
       setError(null);
-      const depthData = await depthChartService.getDepthChartData(baseAsset, quoteAsset);
+      const depthData = await depthChartService.getDepthChartData(
+        baseAsset,
+        quoteAsset,
+      );
       setData(depthData);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch depth chart data';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch depth chart data";
       setError(errorMessage);
-      console.error('Error fetching depth chart data:', err);
+      console.error("Error fetching depth chart data:", err);
     } finally {
       setLoading(false);
     }
@@ -66,7 +72,7 @@ export const useDepthChart = (options: UseDepthChartOptions = {}): UseDepthChart
     data,
     loading,
     error,
-    refresh
+    refresh,
   };
 };
 
