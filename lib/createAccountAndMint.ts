@@ -53,7 +53,7 @@ export async function createAccountAndMint(): Promise<{
     if (!usdcFaucet) {
       console.log("here", usdcFaucetId);
       await client.importAccountById(usdcFaucetId);
-      console.log("HEre2")
+      console.log("HEre2");
       await client.syncState();
       usdcFaucet = await client.getAccount(usdcFaucetId);
       if (!usdcFaucet) {
@@ -114,6 +114,14 @@ export async function createAccountAndMint(): Promise<{
       await client.submitTransaction(consumeTxResult);
       await client.syncState();
       console.log("Notes consumed.");
+    }
+
+    // Save account ID to localStorage for use across the application
+    localStorage.setItem("midenAccountId", accountId);
+
+    // Dispatch custom event to notify other components
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("accountUpdated"));
     }
 
     return {

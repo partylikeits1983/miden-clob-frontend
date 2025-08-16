@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { createAccountAndMint } from '../../lib/createAccountAndMint';
-import { createSwappNote, fetchEthPrice } from '../../lib/swappNoteCreation';
+import React, { useState, useEffect } from "react";
+import { createAccountAndMint } from "../../lib/createAccountAndMint";
+import { createSwappNote, fetchEthPrice } from "../../lib/swappNoteCreation";
 
 export default function MintTokensPage() {
-  const [accountId, setAccountId] = useState('');
+  const [accountId, setAccountId] = useState("");
   const [mintAmount, setMintAmount] = useState(1000);
-  const [tokenType, setTokenType] = useState<'USDC' | 'ETH'>('USDC');
+  const [tokenType, setTokenType] = useState<"USDC" | "ETH">("USDC");
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState("");
   const [balances, setBalances] = useState({ USDC: BigInt(0), ETH: BigInt(0) });
   const [ethPrice, setEthPrice] = useState(0);
 
@@ -25,20 +25,22 @@ export default function MintTokensPage() {
 
   const handleCreateAccountAndMint = async () => {
     setIsLoading(true);
-    setStatus('Creating account and minting tokens...');
-    
+    setStatus("Creating account and minting tokens...");
+
     try {
       const result = await createAccountAndMint();
       if (result.success) {
         setAccountId(result.accountId);
         // Save to localStorage for use in other components
-        localStorage.setItem('midenAccountId', result.accountId);
+        localStorage.setItem("midenAccountId", result.accountId);
         setStatus(result.message);
       } else {
         setStatus(`❌ ${result.message}`);
       }
     } catch (error) {
-      setStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatus(
+        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -48,29 +50,37 @@ export default function MintTokensPage() {
 
   const updateBalances = async () => {
     if (!accountId) return;
-    
+
     try {
       // Mock balances for now - replace with actual balance fetching
       setBalances({ USDC: BigInt(1000), ETH: BigInt(1) });
     } catch (error) {
-      console.error('Error fetching balances:', error);
+      console.error("Error fetching balances:", error);
     }
   };
 
   const handleCreateSwappNote = async () => {
     if (!accountId) {
-      setStatus('❌ Please enter an account ID');
+      setStatus("❌ Please enter an account ID");
       return;
     }
 
     setIsLoading(true);
-    setStatus(`Creating ${isBid ? 'BID' : 'ASK'} SWAPP note...`);
-    
+    setStatus(`Creating ${isBid ? "BID" : "ASK"} SWAPP note...`);
+
     try {
-      await createSwappNote(accountId, isBid, swappPrice, swappQuantity, ethPrice);
-      setStatus(`✅ Successfully created ${isBid ? 'BID' : 'ASK'} SWAPP note!`);
+      await createSwappNote(
+        accountId,
+        isBid,
+        swappPrice,
+        swappQuantity,
+        ethPrice,
+      );
+      setStatus(`✅ Successfully created ${isBid ? "BID" : "ASK"} SWAPP note!`);
     } catch (error) {
-      setStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatus(
+        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -85,8 +95,10 @@ export default function MintTokensPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">Miden CLOB - Mint Tokens & Create SWAPP Notes</h1>
-        
+        <h1 className="text-3xl font-bold mb-8 text-center">
+          Miden CLOB - Mint Tokens & Create SWAPP Notes
+        </h1>
+
         {/* Account ID Input */}
         <div className="bg-gray-800 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Account Configuration</h2>
@@ -100,7 +112,7 @@ export default function MintTokensPage() {
               className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           {/* Display current ETH price */}
           {ethPrice > 0 && (
             <div className="text-sm text-gray-400">
@@ -116,11 +128,15 @@ export default function MintTokensPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-gray-700 p-4 rounded">
                 <div className="text-sm text-gray-400">USDC Balance</div>
-                <div className="text-lg font-semibold">{balances.USDC.toString()}</div>
+                <div className="text-lg font-semibold">
+                  {balances.USDC.toString()}
+                </div>
               </div>
               <div className="bg-gray-700 p-4 rounded">
                 <div className="text-sm text-gray-400">ETH Balance</div>
-                <div className="text-lg font-semibold">{balances.ETH.toString()}</div>
+                <div className="text-lg font-semibold">
+                  {balances.ETH.toString()}
+                </div>
               </div>
             </div>
             <button
@@ -134,29 +150,33 @@ export default function MintTokensPage() {
 
         {/* Create New Account & Mint */}
         <div className="bg-gray-800 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Create New Account & Mint Tokens</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Create New Account & Mint Tokens
+          </h2>
           <p className="text-gray-400 mb-4">
-            This will create a new account (Alice), deploy a faucet, and mint tokens automatically.
+            This will create a new account (Alice), deploy a faucet, and mint
+            tokens automatically.
           </p>
           <button
             onClick={handleCreateAccountAndMint}
             disabled={isLoading}
             className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded-md transition-colors"
           >
-            {isLoading ? 'Creating...' : 'Create Account & Mint Tokens'}
+            {isLoading ? "Creating..." : "Create Account & Mint Tokens"}
           </button>
         </div>
-
 
         {/* Create SWAPP Note */}
         <div className="bg-gray-800 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Create SWAPP Note</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Order Type</label>
+              <label className="block text-sm font-medium mb-2">
+                Order Type
+              </label>
               <select
-                value={isBid ? 'bid' : 'ask'}
-                onChange={(e) => setIsBid(e.target.value === 'bid')}
+                value={isBid ? "bid" : "ask"}
+                onChange={(e) => setIsBid(e.target.value === "bid")}
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="bid">BID (Buy ETH with USDC)</option>
@@ -164,7 +184,9 @@ export default function MintTokensPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Price (USDC per ETH)</label>
+              <label className="block text-sm font-medium mb-2">
+                Price (USDC per ETH)
+              </label>
               <input
                 type="number"
                 value={swappPrice}
@@ -174,7 +196,9 @@ export default function MintTokensPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Quantity (ETH)</label>
+              <label className="block text-sm font-medium mb-2">
+                Quantity (ETH)
+              </label>
               <input
                 type="number"
                 value={swappQuantity}
@@ -189,11 +213,11 @@ export default function MintTokensPage() {
                 disabled={isLoading || !accountId}
                 className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 rounded-md transition-colors"
               >
-                {isLoading ? 'Creating...' : 'Create SWAPP Note'}
+                {isLoading ? "Creating..." : "Create SWAPP Note"}
               </button>
             </div>
           </div>
-          
+
           {/* Order Summary */}
           <div className="bg-gray-700 p-4 rounded-md">
             <h3 className="font-semibold mb-2">Order Summary:</h3>
@@ -202,13 +226,18 @@ export default function MintTokensPage() {
                 <>
                   <div>Type: BUY {swappQuantity} ETH</div>
                   <div>Price: ${swappPrice} per ETH</div>
-                  <div>Total Cost: ${(swappPrice * swappQuantity).toFixed(2)} USDC</div>
+                  <div>
+                    Total Cost: ${(swappPrice * swappQuantity).toFixed(2)} USDC
+                  </div>
                 </>
               ) : (
                 <>
                   <div>Type: SELL {swappQuantity} ETH</div>
                   <div>Price: ${swappPrice} per ETH</div>
-                  <div>Total Receive: ${(swappPrice * swappQuantity).toFixed(2)} USDC</div>
+                  <div>
+                    Total Receive: ${(swappPrice * swappQuantity).toFixed(2)}{" "}
+                    USDC
+                  </div>
                 </>
               )}
             </div>
@@ -219,7 +248,9 @@ export default function MintTokensPage() {
         {status && (
           <div className="bg-gray-800 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Status</h2>
-            <div className="font-mono text-sm whitespace-pre-wrap">{status}</div>
+            <div className="font-mono text-sm whitespace-pre-wrap">
+              {status}
+            </div>
           </div>
         )}
       </div>

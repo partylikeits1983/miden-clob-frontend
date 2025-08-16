@@ -84,7 +84,6 @@ export async function createSwappNote(
       OutputNotesArray,
       NoteExecutionHint,
       NoteTag,
-      NoteExecutionMode,
       NoteMetadata,
       FeltArray,
       Felt,
@@ -99,7 +98,7 @@ export async function createSwappNote(
     );
 
     console.log("Latest block:", (await client.syncState()).blockNum());
-    console.log("HERE")
+    console.log("HERE");
 
     // Parse account IDs
     const creatorId = AccountId.fromHex(creatorAccountId);
@@ -112,15 +111,15 @@ export async function createSwappNote(
 
     if (isBid) {
       // Buying ETH with USDC: offer USDC, request ETH
-      const usdcAmount = BigInt(Math.floor(quantity * price * 1000)); // Convert to smaller units
-      const ethAmount = BigInt(Math.floor(quantity * 1000)); // Convert to smaller units
+      const usdcAmount = BigInt(10); // Convert to smaller units
+      const ethAmount = BigInt(10); // Convert to smaller units
 
       offeredAsset = new FungibleAsset(usdcFaucetId, usdcAmount);
       requestedAsset = new FungibleAsset(ethFaucetId, ethAmount);
     } else {
       // Selling ETH for USDC: offer ETH, request USDC
-      const ethAmount = BigInt(Math.floor(quantity * 1000)); // Convert to smaller units
-      const usdcAmount = BigInt(Math.floor(quantity * price * 1000)); // Convert to smaller units
+      const ethAmount = BigInt(10); // Convert to smaller units
+      const usdcAmount = BigInt(10); // Convert to smaller units
 
       offeredAsset = new FungibleAsset(ethFaucetId, ethAmount);
       requestedAsset = new FungibleAsset(usdcFaucetId, usdcAmount);
@@ -140,37 +139,32 @@ export async function createSwappNote(
     // Create note assets
     const assets = new NoteAssets([offeredAsset]);
 
-    // Create note inputs based on SWAPP note structure
-    const requestedAssetWord = [
-      new Felt(requestedAsset.amount()),
-      new Felt(BigInt(0)),
-      requestedAsset.faucetId().prefix(),
-      requestedAsset.faucetId().suffix(),
-    ];
-
     // Build swap tag and P2ID tag
-    const swappTag = NoteTag.fromAccountId(
-      creatorId,
-    );
-    const p2idTag = NoteTag.fromAccountId(
-      creatorId,
-    );
+    const swappTag = NoteTag.fromAccountId(creatorId);
+    const p2idTag = NoteTag.fromAccountId(creatorId);
+
+    console.log("159");
 
     const inputs = new NoteInputs(
       new FeltArray([
-        ...requestedAssetWord,
-        swappTag,
-        p2idTag,
+        new Felt(requestedAsset.amount()),
+        new Felt(BigInt(0)),
+        new Felt(requestedAsset.faucetId().prefix().asInt()),
+        new Felt(requestedAsset.faucetId().suffix().asInt()),
+        new Felt(BigInt(swappTag.asU32())),
+        new Felt(BigInt(p2idTag.asU32())),
         new Felt(BigInt(0)),
         new Felt(BigInt(0)),
         new Felt(BigInt(0)), // swap_count starts at 0
         new Felt(BigInt(0)),
         new Felt(BigInt(0)),
         new Felt(BigInt(0)),
-        creatorId.prefix(),
-        creatorId.suffix(),
+        new Felt(creatorId.prefix().asInt()),
+        new Felt(creatorId.suffix().asInt()),
       ]),
     );
+
+    console.log("165");
 
     // Create note metadata
     const metadata = new NoteMetadata(
@@ -185,26 +179,23 @@ export async function createSwappNote(
 
     // Create the SWAPP note
     const swappNote = new Note(assets, metadata, recipient);
-    const outputNote = OutputNote.full(swappNote);
+    console.log("HERE2", swappNote.id());
 
     console.log(`Creating ${isBid ? "BID" : "ASK"} SWAPP note:`);
     console.log(`- Price: ${price} USDC per ETH`);
     console.log(`- Quantity: ${quantity} ETH`);
-    console.log(
-      `- Offered: ${offeredAsset.amount()} ${isBid ? "USDC" : "ETH"}`,
-    );
-    console.log(
-      `- Requested: ${requestedAsset.amount()} ${isBid ? "ETH" : "USDC"}`,
-    );
 
-    console.log("HERE2")
+
+    let transactionRequest = new TransactionRequestBuilder()
+      .withOwnOutputNotes(new OutputNotesArray([OutputNote.full(swappNote)]))
+      .build();
+
+    console.log("208")
 
     // Create transaction
     const transaction = await client.newTransaction(
       creatorId,
-      new TransactionRequestBuilder()
-        .withOwnOutputNotes(new OutputNotesArray([outputNote]))
-        .build(),
+      transactionRequest,
     );
 
     // Submit transaction

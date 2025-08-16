@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { createAccountAndMint } from '../../lib/createAccountAndMint';
-import { fetchEthPrice } from '../../lib/swappNoteCreation';
+import React, { useState, useEffect } from "react";
+import { createAccountAndMint } from "../../lib/createAccountAndMint";
+import { fetchEthPrice } from "../../lib/swappNoteCreation";
 
 export default function NavigationHeader() {
   const [showMintModal, setShowMintModal] = useState(false);
-  const [accountId, setAccountId] = useState('');
+  const [accountId, setAccountId] = useState("");
   const [mintAmount, setMintAmount] = useState(1000);
-  const [tokenType, setTokenType] = useState<'USDC' | 'ETH'>('USDC');
+  const [tokenType, setTokenType] = useState<"USDC" | "ETH">("USDC");
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState("");
   const [balances, setBalances] = useState({ USDC: BigInt(0), ETH: BigInt(0) });
   const [ethPrice, setEthPrice] = useState(0);
-  const [mintMode, setMintMode] = useState<'existing' | 'new'>('new');
+  const [mintMode, setMintMode] = useState<"existing" | "new">("new");
 
   useEffect(() => {
     fetchEthPrice().then(setEthPrice).catch(console.error);
@@ -19,19 +19,19 @@ export default function NavigationHeader() {
 
   const updateBalances = async () => {
     if (!accountId) return;
-    
+
     try {
       // Mock balances for now - replace with actual balance fetching
       setBalances({ USDC: BigInt(1000), ETH: BigInt(1) });
     } catch (error) {
-      console.error('Error fetching balances:', error);
+      console.error("Error fetching balances:", error);
     }
   };
 
   const handleCreateNewAccountAndMint = async () => {
     setIsLoading(true);
-    setStatus('Creating new account and minting tokens...');
-    
+    setStatus("Creating new account and minting tokens...");
+
     try {
       const result = await createAccountAndMint();
       if (result.success) {
@@ -45,7 +45,9 @@ export default function NavigationHeader() {
         setStatus(`❌ ${result.message}`);
       }
     } catch (error) {
-      setStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatus(
+        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -53,19 +55,21 @@ export default function NavigationHeader() {
 
   const handleMintTokens = async () => {
     if (!accountId) {
-      setStatus('❌ Please enter an account ID');
+      setStatus("❌ Please enter an account ID");
       return;
     }
 
     setIsLoading(true);
     setStatus(`Minting ${mintAmount} ${tokenType} tokens...`);
-    
+
     try {
       // Mock minting for now - replace with actual minting logic
       setStatus(`✅ Successfully minted ${mintAmount} ${tokenType} tokens!`);
       await updateBalances();
     } catch (error) {
-      setStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatus(
+        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +88,10 @@ export default function NavigationHeader() {
           <div className="flex items-center space-x-8">
             <h1 className="text-xl font-bold text-white">zkCLOB</h1>
             <nav className="flex space-x-6">
-              <a href="/" className="text-gray-300 hover:text-white transition-colors">
+              <a
+                href="/"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
                 Trading
               </a>
               <button
@@ -93,10 +100,16 @@ export default function NavigationHeader() {
               >
                 Mint
               </button>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+              <a
+                href="#"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
                 Portfolio
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+              <a
+                href="#"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
                 History
               </a>
             </nav>
@@ -128,7 +141,7 @@ export default function NavigationHeader() {
                 ✕
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {/* Mode Selection */}
               <div>
@@ -137,21 +150,21 @@ export default function NavigationHeader() {
                 </label>
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => setMintMode('new')}
+                    onClick={() => setMintMode("new")}
                     className={`flex-1 py-2 px-3 rounded text-sm font-medium transition-colors ${
-                      mintMode === 'new'
-                        ? 'bg-orange-600 text-white'
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      mintMode === "new"
+                        ? "bg-orange-600 text-white"
+                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                     }`}
                   >
                     Create New Account
                   </button>
                   <button
-                    onClick={() => setMintMode('existing')}
+                    onClick={() => setMintMode("existing")}
                     className={`flex-1 py-2 px-3 rounded text-sm font-medium transition-colors ${
-                      mintMode === 'existing'
-                        ? 'bg-orange-600 text-white'
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      mintMode === "existing"
+                        ? "bg-orange-600 text-white"
+                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                     }`}
                   >
                     Use Existing Account
@@ -159,12 +172,13 @@ export default function NavigationHeader() {
                 </div>
               </div>
 
-              {mintMode === 'new' ? (
+              {mintMode === "new" ? (
                 <>
                   {/* New Account Mode */}
                   <div className="bg-gray-800 p-3 rounded">
                     <p className="text-sm text-gray-300 mb-2">
-                      This will create a new account, deploy a faucet, and mint 1000 MID tokens automatically.
+                      This will create a new account, deploy a faucet, and mint
+                      1000 MID tokens automatically.
                     </p>
                   </div>
 
@@ -173,7 +187,9 @@ export default function NavigationHeader() {
                     disabled={isLoading}
                     className="w-full py-3 rounded font-medium transition-colors bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white"
                   >
-                    {isLoading ? 'Creating Account & Minting...' : 'Create Account & Mint Tokens'}
+                    {isLoading
+                      ? "Creating Account & Minting..."
+                      : "Create Account & Mint Tokens"}
                   </button>
                 </>
               ) : (
@@ -198,7 +214,9 @@ export default function NavigationHeader() {
                     </label>
                     <select
                       value={tokenType}
-                      onChange={(e) => setTokenType(e.target.value as 'USDC' | 'ETH')}
+                      onChange={(e) =>
+                        setTokenType(e.target.value as "USDC" | "ETH")
+                      }
                       className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:border-orange-500"
                     >
                       <option value="USDC">USDC</option>
@@ -224,7 +242,7 @@ export default function NavigationHeader() {
                     disabled={isLoading || !accountId}
                     className="w-full py-3 rounded font-medium transition-colors bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 text-white"
                   >
-                    {isLoading ? 'Minting...' : `Mint ${tokenType} Tokens`}
+                    {isLoading ? "Minting..." : `Mint ${tokenType} Tokens`}
                   </button>
 
                   {/* Account Balances */}

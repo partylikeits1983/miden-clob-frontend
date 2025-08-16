@@ -1,64 +1,107 @@
-import React, { useState, useEffect } from 'react';
-import { createSwappNote, fetchEthPrice } from '../../lib/swappNoteCreation';
+import React, { useState, useEffect } from "react";
+import { createSwappNote, fetchEthPrice } from "../../lib/swappNoteCreation";
 
 export default function BuySellPanel() {
-  const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy');
-  const [amount, setAmount] = useState('');
-  const [price, setPrice] = useState('');
-  
-  const [accountId, setAccountId] = useState('');
+  const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
+  const [amount, setAmount] = useState("");
+  const [price, setPrice] = useState("");
+
+  const [accountId, setAccountId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState("");
   const [balances, setBalances] = useState({ USDC: BigInt(0), ETH: BigInt(0) });
   const [ethPrice, setEthPrice] = useState(0);
 
   useEffect(() => {
     // Fetch ETH price on component mount
     fetchEthPrice().then(setEthPrice).catch(console.error);
-    
-    // Load account ID from localStorage if available
-    const savedAccountId = localStorage.getItem('midenAccountId');
-    if (savedAccountId) {
-      setAccountId(savedAccountId);
-    }
-  }, []);
+
+    // Function to check for account ID
+    const checkForAccountId = () => {
+      const savedAccountId = localStorage.getItem("midenAccountId");
+      if (savedAccountId && savedAccountId !== accountId) {
+        setAccountId(savedAccountId);
+        setStatus(`✅ Account loaded: ${savedAccountId.slice(0, 10)}...`);
+      } else if (!savedAccountId && accountId) {
+        setAccountId("");
+        setStatus(
+          "⚠️ No account found. Please create an account in the Mint page first.",
+        );
+      } else if (!savedAccountId) {
+        setStatus(
+          "⚠️ No account found. Please create an account in the Mint page first.",
+        );
+      }
+    };
+
+    // Initial check
+    checkForAccountId();
+
+    // Listen for storage events (when localStorage is updated from another tab/component)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "midenAccountId") {
+        checkForAccountId();
+      }
+    };
+
+    // Listen for custom events (for same-page updates)
+    const handleAccountUpdate = () => {
+      checkForAccountId();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("accountUpdated", handleAccountUpdate);
+
+    // Also check periodically in case the storage event doesn't fire
+    const interval = setInterval(checkForAccountId, 2000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("accountUpdated", handleAccountUpdate);
+      clearInterval(interval);
+    };
+  }, [accountId]);
 
   const updateBalances = async () => {
     if (!accountId) return;
-    
+
     try {
       // Mock balances for now - replace with actual balance fetching
       setBalances({ USDC: BigInt(10000), ETH: BigInt(5) });
     } catch (error) {
-      console.error('Error fetching balances:', error);
+      console.error("Error fetching balances:", error);
     }
   };
 
   const handleCreateSwappNote = async () => {
     if (!price || !amount) {
-      setStatus('❌ Please enter price and amount');
+      setStatus("❌ Please enter price and amount");
       return;
     }
 
     if (!accountId) {
-      setStatus('❌ Please create an account first in the Mint page');
+      setStatus("❌ Please create an account first in the Mint page");
       return;
     }
 
     setIsLoading(true);
-    setStatus(`Creating ${activeTab === 'buy' ? 'BID' : 'ASK'} SWAPP note...`);
-    
+    setStatus(`Creating ${activeTab === "buy" ? "BID" : "ASK"} SWAPP note...`);
+
     try {
       await createSwappNote(
         accountId,
-        activeTab === 'buy',
+        activeTab === "buy",
         parseFloat(price),
         parseFloat(amount),
-        ethPrice
+        ethPrice,
       );
-      setStatus(`✅ Successfully created ${activeTab === 'buy' ? 'BID' : 'ASK'} SWAPP note!`);
+      setStatus(
+        `✅ Successfully created ${activeTab === "buy" ? "BID" : "ASK"} SWAPP note!`,
+      );
     } catch (error) {
-      setStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatus(
+        `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -74,21 +117,21 @@ export default function BuySellPanel() {
     <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full">
       <div className="flex mb-4">
         <button
-          onClick={() => setActiveTab('buy')}
+          onClick={() => setActiveTab("buy")}
           className={`flex-1 py-2 px-4 rounded-l-lg font-medium transition-colors ${
-            activeTab === 'buy'
-              ? 'bg-green-600 text-white'
-              : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
+            activeTab === "buy"
+              ? "bg-green-600 text-white"
+              : "bg-zinc-800 text-gray-300 hover:bg-zinc-700"
           }`}
         >
           Buy
         </button>
         <button
-          onClick={() => setActiveTab('sell')}
+          onClick={() => setActiveTab("sell")}
           className={`flex-1 py-2 px-4 rounded-r-lg font-medium transition-colors ${
-            activeTab === 'sell'
-              ? 'bg-red-600 text-white'
-              : 'bg-zinc-800 text-gray-300 hover:bg-zinc-700'
+            activeTab === "sell"
+              ? "bg-red-600 text-white"
+              : "bg-zinc-800 text-gray-300 hover:bg-zinc-700"
           }`}
         >
           Sell
@@ -126,7 +169,13 @@ export default function BuySellPanel() {
         <div className="text-sm text-gray-400">
           <div className="flex justify-between">
             <span>Total:</span>
-            <span>${(parseFloat(price || '0') * parseFloat(amount || '0')).toFixed(2)} USDC</span>
+            <span>
+              $
+              {(parseFloat(price || "0") * parseFloat(amount || "0")).toFixed(
+                2,
+              )}{" "}
+              USDC
+            </span>
           </div>
         </div>
 
@@ -134,17 +183,16 @@ export default function BuySellPanel() {
           onClick={handleCreateSwappNote}
           disabled={isLoading || !price || !amount || !accountId}
           className={`w-full py-3 rounded font-medium transition-colors ${
-            activeTab === 'buy'
-              ? 'bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white'
-              : 'bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white'
+            activeTab === "buy"
+              ? "bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white"
+              : "bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white"
           }`}
         >
           {isLoading
-            ? 'Creating...'
-            : activeTab === 'buy'
-              ? 'Create Buy Order'
-              : 'Create Sell Order'
-          }
+            ? "Creating..."
+            : activeTab === "buy"
+              ? "Create Buy Order"
+              : "Create Sell Order"}
         </button>
 
         {/* Account Balances for trading */}
