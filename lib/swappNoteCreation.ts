@@ -185,12 +185,11 @@ export async function createSwappNote(
     console.log(`- Price: ${price} USDC per ETH`);
     console.log(`- Quantity: ${quantity} ETH`);
 
-
     let transactionRequest = new TransactionRequestBuilder()
       .withOwnOutputNotes(new OutputNotesArray([OutputNote.full(swappNote)]))
       .build();
 
-    console.log("208")
+    console.log("208");
 
     // Create transaction
     const transaction = await client.newTransaction(
