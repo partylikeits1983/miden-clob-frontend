@@ -197,7 +197,7 @@ export async function createSwappNote(
       `- Requested: ${requestedAsset.amount()} ${isBid ? "ETH" : "USDC"}`,
     );
 
-    console.log("HERE")
+    console.log("HERE2")
 
     // Create transaction
     const transaction = await client.newTransaction(

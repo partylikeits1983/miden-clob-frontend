@@ -9,10 +9,10 @@ export default function OpenOrders() {
   ];
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full">
+    <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-white">Open Orders</h3>
-        <button className="text-sm text-blue-400 hover:text-blue-300">
+        <button className="text-sm text-orange-400 hover:text-orange-300">
           View All
         </button>
       </div>
@@ -20,7 +20,7 @@ export default function OpenOrders() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-gray-400 border-b border-gray-700">
+            <tr className="text-gray-400 border-b border-zinc-800">
               <th className="text-left py-2">Type</th>
               <th className="text-right py-2">Amount</th>
               <th className="text-right py-2">Price</th>
@@ -31,7 +31,7 @@ export default function OpenOrders() {
           </thead>
           <tbody>
             {mockOrders.map((order) => (
-              <tr key={order.id} className="border-b border-gray-700 hover:bg-gray-750">
+              <tr key={order.id} className="border-b border-zinc-800 hover:bg-zinc-900">
                 <td className="py-3">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
                     order.type === 'Buy' 

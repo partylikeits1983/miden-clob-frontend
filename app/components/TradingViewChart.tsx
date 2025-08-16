@@ -91,21 +91,21 @@ export default function TradingViewChart() {
     // Create chart
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: 'transparent' },
+        background: { type: ColorType.Solid, color: '#0a0a0a' },
         textColor: '#d1d5db',
       },
       grid: {
-        vertLines: { color: '#374151' },
-        horzLines: { color: '#374151' },
+        vertLines: { color: '#18181b' },
+        horzLines: { color: '#18181b' },
       },
       crosshair: {
         mode: 1,
       },
       rightPriceScale: {
-        borderColor: '#4b5563',
+        borderColor: '#374151',
       },
       timeScale: {
-        borderColor: '#4b5563',
+        borderColor: '#374151',
         timeVisible: true,
         secondsVisible: false,
       },
@@ -159,7 +159,7 @@ export default function TradingViewChart() {
 
   if (loading) {
     return (
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex items-center justify-center">
+      <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full flex items-center justify-center">
         <div className="text-white">Loading chart data...</div>
       </div>
     );
@@ -167,12 +167,12 @@ export default function TradingViewChart() {
 
   if (error || priceData.length === 0) {
     return (
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex items-center justify-center">
+      <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-400 mb-2">{error || 'No data available'}</div>
           <button
             onClick={fetchPriceData}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded"
           >
             Retry
           </button>
@@ -182,7 +182,7 @@ export default function TradingViewChart() {
   }
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex flex-col">
+    <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-white">ETH/USDC</h3>
         <div className="flex space-x-2">

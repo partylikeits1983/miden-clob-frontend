@@ -1,8 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: #111827;
+  --background: #000000;
   --foreground: #f9fafb;
+  
+  /* Dark theme colors - Kraken-style */
+  --bg-primary: #000000;        /* Main background - pure black */
+  --bg-secondary: #0f0f0f;      /* Component backgrounds - ultra dark */
+  --bg-tertiary: #1a1a1a;       /* Input/button backgrounds */
+  --border-primary: #2a2a2a;    /* Main borders */
+  --border-secondary: #1a1a1a;  /* Subtle borders */
+  
+  /* Orange accent colors */
+  --accent-primary: #f97316;     /* Orange-600 */
+  --accent-hover: #ea580c;       /* Orange-700 */
+  --accent-light: #fb923c;       /* Orange-400 */
+  
+  /* Text colors */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;     /* Gray-400 */
+  --text-muted: #71717a;         /* Gray-500 */
 }
 
 @theme inline {

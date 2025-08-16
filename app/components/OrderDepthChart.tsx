@@ -23,7 +23,7 @@ export default function OrderDepthChart({
 
   if (loading && !data) {
     return (
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex items-center justify-center">
+      <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full flex items-center justify-center">
         <div className="text-white">Loading order book...</div>
       </div>
     );
@@ -31,12 +31,12 @@ export default function OrderDepthChart({
 
   if (error && !data) {
     return (
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full">
+      <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-white">Order Book</h3>
           <button
             onClick={refresh}
-            className="text-sm text-blue-400 hover:text-blue-300"
+            className="text-sm text-orange-400 hover:text-orange-300"
           >
             Retry
           </button>
@@ -50,7 +50,7 @@ export default function OrderDepthChart({
 
   if (!data) {
     return (
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex items-center justify-center">
+      <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full flex items-center justify-center">
         <div className="text-gray-400">No data available</div>
       </div>
     );
@@ -64,7 +64,7 @@ export default function OrderDepthChart({
   );
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex flex-col">
+    <div className="bg-neutral-950 border border-zinc-800 rounded-lg p-4 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4 flex-shrink-0">
         <h3 className="text-lg font-semibold text-white">Order Book</h3>
         <div className="flex items-center gap-4">

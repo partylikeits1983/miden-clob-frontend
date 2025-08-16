@@ -8,7 +8,7 @@ import OrderDepthChart from './components/OrderDepthChart';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-black text-white">
       {/* Navigation Header */}
       <NavigationHeader />
       
