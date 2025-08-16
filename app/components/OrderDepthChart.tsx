@@ -11,7 +11,7 @@ interface OrderDepthChartProps {
 export default function OrderDepthChart({
   baseAsset = 'ETH',
   quoteAsset = 'USDC',
-  refreshInterval = 2000,
+  refreshInterval = 8000,
   autoRefresh = true
 }: OrderDepthChartProps) {
   const { data, loading, error, refresh } = useDepthChart({

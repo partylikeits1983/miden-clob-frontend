@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { getTokenBalance } from '../../lib/createMintConsume';
 import { createSwappNote, fetchEthPrice } from '../../lib/swappNoteCreation';
 
 export default function BuySellPanel() {
@@ -16,28 +15,33 @@ export default function BuySellPanel() {
   useEffect(() => {
     // Fetch ETH price on component mount
     fetchEthPrice().then(setEthPrice).catch(console.error);
+    
+    // Load account ID from localStorage if available
+    const savedAccountId = localStorage.getItem('midenAccountId');
+    if (savedAccountId) {
+      setAccountId(savedAccountId);
+    }
   }, []);
 
   const updateBalances = async () => {
     if (!accountId) return;
     
     try {
-      const usdcBalance = await getTokenBalance(accountId, 'USDC');
-      const ethBalance = await getTokenBalance(accountId, 'ETH');
-      setBalances({ USDC: usdcBalance, ETH: ethBalance });
+      // Mock balances for now - replace with actual balance fetching
+      setBalances({ USDC: BigInt(10000), ETH: BigInt(5) });
     } catch (error) {
       console.error('Error fetching balances:', error);
     }
   };
 
   const handleCreateSwappNote = async () => {
-    if (!accountId) {
-      setStatus('❌ Please enter an account ID');
+    if (!price || !amount) {
+      setStatus('❌ Please enter price and amount');
       return;
     }
 
-    if (!price || !amount) {
-      setStatus('❌ Please enter price and amount');
+    if (!accountId) {
+      setStatus('❌ Please create an account first in the Mint page');
       return;
     }
 
@@ -46,10 +50,10 @@ export default function BuySellPanel() {
     
     try {
       await createSwappNote(
-        accountId, 
-        activeTab === 'buy', 
-        parseFloat(price), 
-        parseFloat(amount), 
+        accountId,
+        activeTab === 'buy',
+        parseFloat(price),
+        parseFloat(amount),
         ethPrice
       );
       setStatus(`✅ Successfully created ${activeTab === 'buy' ? 'BID' : 'ASK'} SWAPP note!`);
@@ -92,20 +96,6 @@ export default function BuySellPanel() {
       </div>
 
       <div className="space-y-4">
-        {/* Account ID for trading */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Account ID
-          </label>
-          <input
-            type="text"
-            value={accountId}
-            onChange={(e) => setAccountId(e.target.value)}
-            placeholder="0x..."
-            className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-          />
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
             Price (USDC per ETH)
@@ -142,18 +132,18 @@ export default function BuySellPanel() {
 
         <button
           onClick={handleCreateSwappNote}
-          disabled={isLoading || !accountId || !price || !amount}
+          disabled={isLoading || !price || !amount || !accountId}
           className={`w-full py-3 rounded font-medium transition-colors ${
             activeTab === 'buy'
               ? 'bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white'
               : 'bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white'
           }`}
         >
-          {isLoading 
-            ? 'Creating...' 
-            : activeTab === 'buy' 
-              ? 'Create Buy SWAPP Note' 
-              : 'Create Sell SWAPP Note'
+          {isLoading
+            ? 'Creating...'
+            : activeTab === 'buy'
+              ? 'Create Buy Order'
+              : 'Create Sell Order'
           }
         </button>
 

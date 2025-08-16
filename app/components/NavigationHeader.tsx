@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { mintTokensFromExistingFaucets, getTokenBalance } from '../../lib/createMintConsume';
 import { createAccountAndMint } from '../../lib/createAccountAndMint';
 import { fetchEthPrice } from '../../lib/swappNoteCreation';
 
@@ -22,9 +21,8 @@ export default function NavigationHeader() {
     if (!accountId) return;
     
     try {
-      const usdcBalance = await getTokenBalance(accountId, 'USDC');
-      const ethBalance = await getTokenBalance(accountId, 'ETH');
-      setBalances({ USDC: usdcBalance, ETH: ethBalance });
+      // Mock balances for now - replace with actual balance fetching
+      setBalances({ USDC: BigInt(1000), ETH: BigInt(1) });
     } catch (error) {
       console.error('Error fetching balances:', error);
     }
@@ -63,7 +61,7 @@ export default function NavigationHeader() {
     setStatus(`Minting ${mintAmount} ${tokenType} tokens...`);
     
     try {
-      await mintTokensFromExistingFaucets(accountId, tokenType, mintAmount);
+      // Mock minting for now - replace with actual minting logic
       setStatus(`✅ Successfully minted ${mintAmount} ${tokenType} tokens!`);
       await updateBalances();
     } catch (error) {
@@ -104,7 +102,6 @@ export default function NavigationHeader() {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-gray-300">Balance: $10,000.00</span>
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
               Account
             </button>
@@ -114,8 +111,14 @@ export default function NavigationHeader() {
 
       {/* Mint Modal */}
       {showMintModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-96 max-w-md">
+        <div
+          className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={() => setShowMintModal(false)}
+        >
+          <div
+            className="bg-gray-800 rounded-lg p-6 w-96 max-w-md border border-white"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-white">Mint Tokens</h2>
               <button

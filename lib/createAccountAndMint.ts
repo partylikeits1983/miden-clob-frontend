@@ -45,13 +45,15 @@ export async function createAccountAndMint(): Promise<{
     await client.syncState();
 
     // 3. Use existing faucets from .env
-    const usdcFaucetId = AccountId.fromHex(ENV_CONFIG.USDC_FAUCET_ID);
-    const ethFaucetId = AccountId.fromHex(ENV_CONFIG.ETH_FAUCET_ID);
+    const usdcFaucetId = AccountId.fromBech32(ENV_CONFIG.USDC_FAUCET_ID);
+    const ethFaucetId = AccountId.fromBech32(ENV_CONFIG.ETH_FAUCET_ID);
 
     // Import the counter contract
     let usdcFaucet = await client.getAccount(usdcFaucetId);
     if (!usdcFaucet) {
+      console.log("here", usdcFaucetId);
       await client.importAccountById(usdcFaucetId);
+      console.log("HEre2")
       await client.syncState();
       usdcFaucet = await client.getAccount(usdcFaucetId);
       if (!usdcFaucet) {

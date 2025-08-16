@@ -99,11 +99,12 @@ export async function createSwappNote(
     );
 
     console.log("Latest block:", (await client.syncState()).blockNum());
+    console.log("HERE")
 
     // Parse account IDs
     const creatorId = AccountId.fromHex(creatorAccountId);
-    const usdcFaucetId = AccountId.fromHex(ENV_CONFIG.USDC_FAUCET_ID);
-    const ethFaucetId = AccountId.fromHex(ENV_CONFIG.ETH_FAUCET_ID);
+    const usdcFaucetId = AccountId.fromBech32(ENV_CONFIG.USDC_FAUCET_ID);
+    const ethFaucetId = AccountId.fromBech32(ENV_CONFIG.ETH_FAUCET_ID);
 
     // Calculate offered and requested assets based on bid/ask
     let offeredAsset: any;
@@ -150,18 +151,16 @@ export async function createSwappNote(
     // Build swap tag and P2ID tag
     const swappTag = NoteTag.fromAccountId(
       creatorId,
-      NoteExecutionMode.newLocal(),
     );
     const p2idTag = NoteTag.fromAccountId(
       creatorId,
-      NoteExecutionMode.newLocal(),
     );
 
     const inputs = new NoteInputs(
       new FeltArray([
         ...requestedAssetWord,
-        swappTag.inner(),
-        p2idTag.inner(),
+        swappTag,
+        p2idTag,
         new Felt(BigInt(0)),
         new Felt(BigInt(0)),
         new Felt(BigInt(0)), // swap_count starts at 0
@@ -197,6 +196,8 @@ export async function createSwappNote(
     console.log(
       `- Requested: ${requestedAsset.amount()} ${isBid ? "ETH" : "USDC"}`,
     );
+
+    console.log("HERE")
 
     // Create transaction
     const transaction = await client.newTransaction(
