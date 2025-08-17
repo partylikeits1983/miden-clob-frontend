@@ -83,7 +83,7 @@ export default function OrderDepthChart({
       <div className="flex flex-col flex-1 min-h-0">
         <div className="grid grid-cols-12 gap-2 text-xs text-gray-400 mb-2 flex-shrink-0 px-2">
           <span className="col-span-4">Price (USD)</span>
-          <span className="col-span-4 text-center">Amount (BTC)</span>
+          <span className="col-span-4 text-center">Amount (ETH)</span>
           <span className="col-span-4 text-right">Total</span>
         </div>
 

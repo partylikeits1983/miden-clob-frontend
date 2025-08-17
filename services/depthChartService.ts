@@ -1,3 +1,5 @@
+import { ENV_CONFIG } from "../lib/config";
+
 export interface OrderBookEntry {
   price: number;
   amount: number;
@@ -10,6 +12,29 @@ export interface DepthChartData {
   spread: number;
   spread_percentage: number;
   last_price: number;
+}
+
+// Backend response interfaces matching the Rust server
+export interface DepthLevel {
+  price: number;
+  quantity: number;
+  cumulative_quantity: number;
+}
+
+export interface MarketInfo {
+  best_bid: number | null;
+  best_ask: number | null;
+  spread: number | null;
+  spread_percentage: number | null;
+  mid_price: number | null;
+  total_bid_volume: number;
+  total_ask_volume: number;
+}
+
+export interface DepthChartResponse {
+  bids: DepthLevel[];
+  asks: DepthLevel[];
+  market_info: MarketInfo;
 }
 
 export interface RawSwapNoteRecord {
@@ -32,7 +57,7 @@ export interface RawSwapNoteRecord {
 class DepthChartService {
   private baseUrl: string;
 
-  constructor(baseUrl: string = "http://localhost:8080") {
+  constructor(baseUrl: string = ENV_CONFIG.SERVER_URL) {
     this.baseUrl = baseUrl;
   }
 
@@ -45,11 +70,11 @@ class DepthChartService {
   ): Promise<DepthChartData> {
     try {
       console.log(
-        `Attempting to fetch depth chart data from: ${this.baseUrl}/api/depth-chart?base=${baseAsset}&quote=${quoteAsset}`,
+        `Attempting to fetch depth chart data from: ${this.baseUrl}/depth/${baseAsset}/${quoteAsset}`,
       );
 
       const response = await fetch(
-        `${this.baseUrl}/api/depth-chart?base=${baseAsset}&quote=${quoteAsset}`,
+        `${this.baseUrl}/depth/${baseAsset}/${quoteAsset}`,
         {
           method: "GET",
           headers: {
@@ -64,20 +89,14 @@ class DepthChartService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: DepthChartResponse = await response.json();
       console.log(
         "Successfully fetched depth chart data from Rust backend:",
         data,
       );
 
-      // The Rust backend returns the data in the exact format we need
-      return {
-        bids: data.bids || [],
-        asks: data.asks || [],
-        spread: data.spread || 0,
-        spread_percentage: data.spread_percentage || 0,
-        last_price: data.last_price || 0,
-      };
+      // Convert the backend response to our frontend format
+      return this.convertBackendResponse(data);
     } catch (error) {
       console.warn(
         "Rust backend not available, falling back to mock data:",
@@ -86,6 +105,33 @@ class DepthChartService {
       // Return mock data as fallback when backend is not available
       return this.getMockDepthChartData();
     }
+  }
+
+  /**
+   * Convert backend DepthChartResponse to frontend DepthChartData format
+   */
+  private convertBackendResponse(response: DepthChartResponse): DepthChartData {
+    // Convert bids (DepthLevel[] to OrderBookEntry[])
+    const bids: OrderBookEntry[] = response.bids.map((bid) => ({
+      price: bid.price,
+      amount: bid.quantity,
+      total: bid.cumulative_quantity,
+    }));
+
+    // Convert asks (DepthLevel[] to OrderBookEntry[])
+    const asks: OrderBookEntry[] = response.asks.map((ask) => ({
+      price: ask.price,
+      amount: ask.quantity,
+      total: ask.cumulative_quantity,
+    }));
+
+    return {
+      bids,
+      asks,
+      spread: response.market_info.spread || 0,
+      spread_percentage: response.market_info.spread_percentage || 0,
+      last_price: response.market_info.mid_price || 0,
+    };
   }
 
   /**

@@ -3,8 +3,8 @@
  */
 
 export const ENV_CONFIG = {
-  USDC_FAUCET_ID: "mtst1qr8tclqegm7q2gpggsshun4m4q60wusa",
-  ETH_FAUCET_ID: "mtst1qpdn79q7lmr2vgpns7jxjq4xcceucqkf",
+  USDC_FAUCET_ID: "mtst1qqdvjx0dm4xekgqeqzhhyw72xumllzyl",
+  ETH_FAUCET_ID: "mtst1qreyzpfd9ey7ggqhljp8nnnjgv5xaj5q",
   MIDEN_NODE_ENDPOINT: "https://rpc.testnet.miden.io:443",
   SERVER_URL: "http://localhost:8080",
   TX_PROVER_ENDPOINT: "https://tx-prover.testnet.miden.io",
