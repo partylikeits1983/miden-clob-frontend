@@ -168,17 +168,24 @@ export async function createSwappNote(
     let offeredAsset: any;
     let requestedAsset: any;
 
+    // Convert to smaller units (multiply by 1000 to match Rust implementation)
+    // Following the same logic as price_to_swap_note in CLOB/src/common.rs:1240-1273
+    const quantityInSmallUnits = BigInt(Math.floor(quantity));
+    const priceInSmallUnits = BigInt(Math.floor(price));
+
     if (isBid) {
-      // Buying ETH with USDC: offer USDC, request ETH
-      const usdcAmount = BigInt(10); // Convert to smaller units
-      const ethAmount = BigInt(10); // Convert to smaller units
+      // Buying ETH with USDC: offer quantity * price of USDC, request quantity of ETH
+      // This matches the Rust logic: offered = FungibleAsset::new(*faucet_b, quantity * price)
+      const usdcAmount = quantityInSmallUnits * priceInSmallUnits;
+      const ethAmount = quantityInSmallUnits;
 
       offeredAsset = new FungibleAsset(usdcFaucetId, usdcAmount);
       requestedAsset = new FungibleAsset(ethFaucetId, ethAmount);
     } else {
-      // Selling ETH for USDC: offer ETH, request USDC
-      const ethAmount = BigInt(10); // Convert to smaller units
-      const usdcAmount = BigInt(10); // Convert to smaller units
+      // Selling ETH for USDC: offer quantity of ETH, request quantity * price of USDC
+      // This matches the Rust logic: offered = FungibleAsset::new(*faucet_a, quantity)
+      const ethAmount = quantityInSmallUnits;
+      const usdcAmount = quantityInSmallUnits * priceInSmallUnits;
 
       offeredAsset = new FungibleAsset(ethFaucetId, ethAmount);
       requestedAsset = new FungibleAsset(usdcFaucetId, usdcAmount);
@@ -286,6 +293,8 @@ export async function createSwappNote(
       "⏳ Waiting for note to be included in a block (5-6 seconds)...",
     );
 
+     await client.syncState();
+
     // Wait for approximately one block time
     await new Promise((resolve) => setTimeout(resolve, 6000));
 
@@ -322,77 +331,6 @@ export async function createSwappNote(
     console.error("Error creating SWAPP note:", error);
     throw error;
   }
-}
-
-/**
- * Creates multiple SWAPP notes for market making
- * Based on the generate_and_submit_real_orders function from populate.rs
- */
-export async function createMultipleSwappNotes(
-  creatorAccountId: string,
-  ethPrice: number,
-  numLevels: number = 2,
-  baseQuantity: number = 0.01,
-  spreadPercentage: number = 0.0001,
-): Promise<void> {
-  console.log(
-    `Creating ${numLevels * 2} SWAPP notes around ETH price $${ethPrice}`,
-  );
-
-  const spread = (ethPrice * spreadPercentage) / 100.0;
-  const halfSpread = spread / 2.0;
-
-  // Generate bid orders (buying ETH with USDC)
-  for (let level = 0; level < numLevels; level++) {
-    const priceOffset = (level + 1) * (halfSpread / numLevels);
-    const priceVariance = (Math.random() - 0.5) * 0.003; // ±0.3% variance
-
-    const bidPrice =
-      (ethPrice - halfSpread - priceOffset) * (1.0 + priceVariance);
-    const quantityVariance = (Math.random() - 0.5) * 0.1; // ±10% variance
-    const ethQuantity = Math.max(
-      0.01,
-      Math.min(10.0, baseQuantity * (1.0 + quantityVariance)),
-    );
-
-    await createSwappNote(
-      creatorAccountId,
-      true,
-      bidPrice,
-      ethQuantity,
-      ethPrice,
-    );
-
-    // Small delay between orders
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  // Generate ask orders (selling ETH for USDC)
-  for (let level = 0; level < numLevels; level++) {
-    const priceOffset = (level + 1) * (halfSpread / numLevels);
-    const priceVariance = (Math.random() - 0.5) * 0.003; // ±0.3% variance
-
-    const askPrice =
-      (ethPrice + halfSpread + priceOffset) * (1.0 + priceVariance);
-    const quantityVariance = (Math.random() - 0.5) * 0.1; // ±10% variance
-    const ethQuantity = Math.max(
-      0.01,
-      Math.min(10.0, baseQuantity * (1.0 + quantityVariance)),
-    );
-
-    await createSwappNote(
-      creatorAccountId,
-      false,
-      askPrice,
-      ethQuantity,
-      ethPrice,
-    );
-
-    // Small delay between orders
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  console.log(`Successfully created ${numLevels * 2} SWAPP notes! ✅`);
 }
 
 /**
