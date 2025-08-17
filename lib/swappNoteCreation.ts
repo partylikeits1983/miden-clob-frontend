@@ -94,7 +94,7 @@ export async function createSwappNote(
 
     const client = await WebClient.createClient(ENV_CONFIG.MIDEN_NODE_ENDPOINT);
     const prover = TransactionProver.newRemoteProver(
-      "https://tx-prover.testnet.miden.io",
+      ENV_CONFIG.TX_PROVER_ENDPOINT,
     );
 
     console.log("Latest block:", (await client.syncState()).blockNum());
@@ -196,6 +196,13 @@ export async function createSwappNote(
       creatorId,
       transactionRequest,
     );
+
+    // Get transaction ID and create MidenScan link
+    const txId = transaction.executedTransaction().id().toHex();
+    const midenScanLink = `https://testnet.midenscan.com/tx/${txId}`;
+
+    console.log(`Transaction ID: ${txId}`);
+    console.log(`View transaction on MidenScan: ${midenScanLink}`);
 
     // Submit transaction
     await client.submitTransaction(transaction, prover);
