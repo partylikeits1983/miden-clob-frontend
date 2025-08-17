@@ -170,7 +170,7 @@ export async function createSwappNote(
 
     // Convert to smaller units (multiply by 1e8 to match depth chart service scaling)
     // Following the same logic as price_to_swap_note in CLOB/src/common.rs:1240-1273
-    const quantityInSmallUnits = BigInt(Math.floor(quantity * 1e8));
+    const quantityInSmallUnits = BigInt(Math.floor(quantity));
     const priceInSmallUnits = BigInt(Math.floor(price));
 
     if (isBid) {

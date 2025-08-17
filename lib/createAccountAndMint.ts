@@ -8,8 +8,8 @@
 import { ENV_CONFIG } from "./config";
 
 // Constants for token amounts
-const USDC_MINT_AMOUNT = BigInt(1000000);
-const ETH_MINT_AMOUNT = BigInt(10000000);
+const USDC_MINT_AMOUNT = BigInt(100000);
+const ETH_MINT_AMOUNT = BigInt(100000);
 const TRANSACTION_CONFIRMATION_DELAY = 10000; // 10 seconds
 
 /**
