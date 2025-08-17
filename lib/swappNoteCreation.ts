@@ -6,50 +6,21 @@
 import { ENV_CONFIG, MARKET_CONFIG } from "./config";
 
 /**
- * SWAPP Note Script for Miden Network
- * Enables creating swap notes for trading assets
+ * Loads the SWAPP Note Script from the external MASM file
+ * @returns Promise<string> The MASM script content
  */
-const SWAPP_NOTE_SCRIPT = `
-use.miden::account
-use.miden::note
-use.miden::asset
-
-# ERRORS
-# =================================================================================================
-
-const.ERR_SWAPP_WRONG_NUMBER_OF_INPUTS="SWAPP note expects exactly 14 note inputs"
-
-const.ERR_SWAPP_INVALID_ASSET="SWAPP note asset validation failed"
-
-#! SWAPP script: enables partial swaps between two assets
-#!
-#! Inputs:  [requested_asset_word, swapp_tag, p2id_tag, 0, 0, swap_count, 0, 0, 0, creator_prefix, creator_suffix]
-#! Outputs: []
-#!
-#! Note inputs are assumed to be as follows:
-#! - requested_asset_word is the asset being requested in exchange
-#! - swapp_tag is the tag for swap functionality
-#! - p2id_tag is the tag for pay-to-id functionality
-#! - swap_count tracks how many times this note has been partially filled
-#! - creator_prefix and creator_suffix identify the note creator
-#!
-#! Panics if:
-#! - Invalid number of inputs
-#! - Asset validation fails
-begin
-    # store the note inputs to memory starting at address 0
-    padw push.0 exec.note::get_inputs
-    # => [num_inputs, inputs_ptr, EMPTY_WORD]
-
-    # make sure the number of inputs is 14
-    eq.14 assert.err=ERR_SWAPP_WRONG_NUMBER_OF_INPUTS
-    # => [inputs_ptr, EMPTY_WORD]
-
-    # Add note assets to account
-    exec.note::add_note_assets_to_account
-    # => []
-end
-`;
+async function loadSwappNoteScript(): Promise<string> {
+  try {
+    const response = await fetch("/SWAPP.masm");
+    if (!response.ok) {
+      throw new Error(`Failed to load SWAPP.masm: ${response.status}`);
+    }
+    return await response.text();
+  } catch (error) {
+    console.error("Error loading SWAPP.masm:", error);
+    throw error;
+  }
+}
 
 /**
  * Creates a SWAPP note for trading on the Miden Network
@@ -133,8 +104,9 @@ export async function createSwappNote(
       new Felt(BigInt(Math.floor(Math.random() * 0x1_0000_0000))),
     ]);
 
-    // Compile the SWAPP note script
-    const script = client.compileNoteScript(SWAPP_NOTE_SCRIPT);
+    // Load and compile the SWAPP note script
+    const swappNoteScript = await loadSwappNoteScript();
+    const script = client.compileNoteScript(swappNoteScript);
 
     // Create note assets
     const assets = new NoteAssets([offeredAsset]);
