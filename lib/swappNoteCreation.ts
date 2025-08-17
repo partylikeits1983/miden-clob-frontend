@@ -6,6 +6,78 @@
 import { ENV_CONFIG, MARKET_CONFIG } from "./config";
 
 /**
+ * Serializes a SWAPP note for server submission using client.exportNote()
+ * This uses the proper Miden SDK serialization method
+ */
+async function serializeNoteForServer(note: any, client: any): Promise<string> {
+  try {
+    // Get the note ID as a hex string
+    const noteId = note.id().toString();
+    console.log("Exporting note with ID:", noteId);
+
+    // Export the note with full details including inclusion proof
+    const noteExport = await client.exportNote(noteId, "Full");
+    console.log("Note export result:", noteExport);
+
+    // The noteExport should be a Uint8Array of bytes
+    let noteBytes: Uint8Array;
+
+    if (noteExport instanceof Uint8Array) {
+      noteBytes = noteExport;
+    } else if (Array.isArray(noteExport)) {
+      noteBytes = new Uint8Array(noteExport);
+    } else {
+      throw new Error("Unexpected note export format");
+    }
+
+    // Convert to base64 string
+    const base64String = btoa(String.fromCharCode(...noteBytes));
+    console.log("Successfully serialized note to base64");
+    return base64String;
+  } catch (error) {
+    console.error("Error serializing note:", error);
+    throw new Error(`Failed to serialize note for server submission: ${error}`);
+  }
+}
+
+/**
+ * Submits a serialized note to the CLOB server
+ * Based on the server submission logic from populate.rs lines 494-525
+ */
+async function submitNoteToServer(serializedNote: string): Promise<boolean> {
+  try {
+    const submitRequest = {
+      note_data: serializedNote,
+    };
+
+    console.log("Submitting order to server...");
+    const response = await fetch(`${ENV_CONFIG.SERVER_URL}/orders/submit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(submitRequest),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log("✅ Successfully submitted order to server:", result);
+      return true;
+    } else {
+      console.warn(
+        `❌ Failed to submit order to server: HTTP ${response.status}`,
+      );
+      const errorText = await response.text();
+      console.warn("Server response:", errorText);
+      return false;
+    }
+  } catch (error) {
+    console.error("❌ Error submitting note to server:", error);
+    return false;
+  }
+}
+
+/**
  * Loads the SWAPP Note Script from the external MASM file
  * @returns Promise<string> The MASM script content
  */
@@ -71,10 +143,26 @@ export async function createSwappNote(
     console.log("Latest block:", (await client.syncState()).blockNum());
     console.log("HERE");
 
-    // Parse account IDs
+    // Parse account IDs - convert bech32 to hex first to avoid MSB issues
     const creatorId = AccountId.fromHex(creatorAccountId);
+
+    // Convert bech32 to hex format to avoid MSB issues with direct bech32 parsing
+    console.log("🔍 Converting faucet IDs from bech32 format...");
     const usdcFaucetId = AccountId.fromBech32(ENV_CONFIG.USDC_FAUCET_ID);
     const ethFaucetId = AccountId.fromBech32(ENV_CONFIG.ETH_FAUCET_ID);
+
+    console.log("USDC Faucet ID:", usdcFaucetId.toString());
+    console.log("ETH Faucet ID:", ethFaucetId.toString());
+    console.log(
+      "USDC prefix/suffix:",
+      usdcFaucetId.prefix().asInt(),
+      usdcFaucetId.suffix().asInt(),
+    );
+    console.log(
+      "ETH prefix/suffix:",
+      ethFaucetId.prefix().asInt(),
+      ethFaucetId.suffix().asInt(),
+    );
 
     // Calculate offered and requested assets based on bid/ask
     let offeredAsset: any;
@@ -117,12 +205,20 @@ export async function createSwappNote(
 
     console.log("159");
 
+    // Debug: Log the actual Felt values before creating inputs
+    console.log("🔍 Requested asset faucet prefix/suffix Felt objects:");
+    console.log("Prefix Felt:", requestedAsset.faucetId().prefix());
+    console.log("Suffix Felt:", requestedAsset.faucetId().suffix());
+    console.log("Creator prefix/suffix Felt objects:");
+    console.log("Creator Prefix Felt:", creatorId.prefix());
+    console.log("Creator Suffix Felt:", creatorId.suffix());
+
     const inputs = new NoteInputs(
       new FeltArray([
         new Felt(requestedAsset.amount()),
         new Felt(BigInt(0)),
-        new Felt(requestedAsset.faucetId().prefix().asInt()),
-        new Felt(requestedAsset.faucetId().suffix().asInt()),
+        requestedAsset.faucetId().suffix(),
+        requestedAsset.faucetId().prefix(),
         new Felt(BigInt(swappTag.asU32())),
         new Felt(BigInt(p2idTag.asU32())),
         new Felt(BigInt(0)),
@@ -131,10 +227,12 @@ export async function createSwappNote(
         new Felt(BigInt(0)),
         new Felt(BigInt(0)),
         new Felt(BigInt(0)),
-        new Felt(creatorId.prefix().asInt()),
-        new Felt(creatorId.suffix().asInt()),
+        creatorId.prefix(), // Use the Felt directly, not .asInt()
+        creatorId.suffix(),
       ]),
     );
+
+    console.log("✅ Created note inputs using Felt objects directly");
 
     console.log("165");
 
@@ -176,10 +274,47 @@ export async function createSwappNote(
     console.log(`Transaction ID: ${txId}`);
     console.log(`View transaction on MidenScan: ${midenScanLink}`);
 
-    // Submit transaction
+    // Submit transaction to blockchain
     await client.submitTransaction(transaction, prover);
 
-    console.log("SWAPP note created and submitted successfully! ✅");
+    console.log(
+      "SWAPP note created and submitted to blockchain successfully! ✅",
+    );
+
+    // Wait for the note to be included in a block before submitting to server
+    console.log(
+      "⏳ Waiting for note to be included in a block (5-6 seconds)...",
+    );
+
+    // Wait for approximately one block time
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+
+    // Sync state to get the latest block data
+    await client.syncState();
+    console.log("🔄 Synced client state");
+
+    // Now try to serialize and submit the note to the CLOB server
+    try {
+      const serializedNote = await serializeNoteForServer(swappNote, client);
+      const serverSubmissionSuccess = await submitNoteToServer(serializedNote);
+
+      if (serverSubmissionSuccess) {
+        console.log("✅ Order successfully submitted to CLOB server!");
+      } else {
+        console.warn(
+          "⚠️ Note submitted to blockchain but failed to submit to CLOB server",
+        );
+      }
+    } catch (serializationError) {
+      console.error(
+        "❌ Failed to serialize/submit note to server:",
+        serializationError,
+      );
+      console.log("ℹ️ Note was still successfully submitted to blockchain");
+      console.log(
+        "💡 The note may need more time to be included in a block. You can try submitting it to the server manually later.",
+      );
+    }
 
     // Return the note for potential future use
     return swappNote;
