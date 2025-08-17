@@ -98,6 +98,15 @@ export default function BuySellPanel() {
       setStatus(
         `✅ Successfully created ${activeTab === "buy" ? "BID" : "ASK"} SWAPP note!`,
       );
+      
+      // Dispatch custom event to notify other components about the new order
+      window.dispatchEvent(new CustomEvent("orderCreated", {
+        detail: {
+          type: activeTab,
+          price: parseFloat(price),
+          amount: parseFloat(amount)
+        }
+      }));
     } catch (error) {
       setStatus(
         `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,

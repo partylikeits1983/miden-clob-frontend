@@ -168,9 +168,9 @@ export async function createSwappNote(
     let offeredAsset: any;
     let requestedAsset: any;
 
-    // Convert to smaller units (multiply by 1000 to match Rust implementation)
+    // Convert to smaller units (multiply by 1e8 to match depth chart service scaling)
     // Following the same logic as price_to_swap_note in CLOB/src/common.rs:1240-1273
-    const quantityInSmallUnits = BigInt(Math.floor(quantity));
+    const quantityInSmallUnits = BigInt(Math.floor(quantity * 1e8));
     const priceInSmallUnits = BigInt(Math.floor(price));
 
     if (isBid) {
@@ -293,7 +293,7 @@ export async function createSwappNote(
       "⏳ Waiting for note to be included in a block (5-6 seconds)...",
     );
 
-     await client.syncState();
+    await client.syncState();
 
     // Wait for approximately one block time
     await new Promise((resolve) => setTimeout(resolve, 6000));
